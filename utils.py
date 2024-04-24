@@ -28,3 +28,10 @@ def get_healthy_server(host, register):
         return random.choice([server for server in register[host] if server.healthy])
     except IndexError:
         return None
+
+
+def healthcheck(register):
+    for host in register:
+        for server in register[host]:
+            server.healthcheck_and_update_status()
+    return register

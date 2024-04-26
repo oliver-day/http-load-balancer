@@ -1,5 +1,3 @@
-import random
-
 import requests
 from flask import Flask, request
 
@@ -18,9 +16,9 @@ register = transform_backends_from_config(config)
 
 
 @loadbalancer.route("/")
-def router():
+@loadbalancer.route("/<path>")
+def router(path="/"):
     updated_register = healthcheck(register)
-    print(updated_register)
     host_header = request.headers["Host"]
     for entry in config["hosts"]:
         if host_header == entry["host"]:
@@ -29,15 +27,11 @@ def router():
                 return "No backend servers available.", 503
             response = requests.get(f"http://{healthy_server.endpoint}")
             return response.content, response.status_code
-
-    updated_register = healthcheck(register)
-    print(updated_register)
-
-
-@loadbalancer.route("/<path>")
-def path_router(path):
     for entry in config["paths"]:
         if ("/" + path) == entry["path"]:
-            response = requests.get(f'http://{random.choice(entry["servers"])}')
+            healthy_server = get_healthy_server(entry["path"], register)
+            if not healthy_server:
+                return "No backend servers available.", 503
+            response = requests.get(f"http://{healthy_server.endpoint}")
             return response.content, response.status_code
     return "Not Found", 404

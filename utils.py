@@ -35,3 +35,17 @@ def healthcheck(register):
         for server in register[host]:
             server.healthcheck_and_update_status()
     return register
+
+
+def process_header_rules(config, host, rules):
+    for entry in config.get("hosts", []):
+        if host == entry["host"]:
+            header_rules = entry.get("header_rules", {})
+            for instruction, modify_headers in header_rules.items():
+                if instruction == "add":
+                    rules.update(modify_headers)
+                if instruction == "remove":
+                    for key in modify_headers.keys():
+                        if key in rules:
+                            rules.pop(key)
+    return rules

@@ -1,9 +1,17 @@
 hosts:
   - host: www.mango.com
+    header_rules:
+      add:
+        MyCustomHeader: Test
+      remove:
+        Host: www.mango.com
     servers:
       - localhost:8081
       - localhost:8082
   - host: www.apple.com
+    header_rules:
+      remove:
+        Host: www.apple.com
     servers:
       - localhost:9081
       - localhost:9082

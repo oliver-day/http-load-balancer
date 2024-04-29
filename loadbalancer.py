@@ -5,6 +5,7 @@ from utils import (
     get_healthy_server,
     healthcheck,
     load_configuration,
+    process_header_rules,
     transform_backends_from_config,
 )
 
@@ -20,13 +21,20 @@ register = transform_backends_from_config(config)
 def router(path="/"):
     updated_register = healthcheck(register)
     host_header = request.headers["Host"]
+
     for entry in config["hosts"]:
         if host_header == entry["host"]:
             healthy_server = get_healthy_server(entry["host"], updated_register)
             if not healthy_server:
                 return "No backend servers available.", 503
-            response = requests.get(f"http://{healthy_server.endpoint}")
+            headers = process_header_rules(
+                config, host_header, {k: v for k, v in request.headers.items()}
+            )
+            response = requests.get(
+                f"http://{healthy_server.endpoint}", headers=headers
+            )
             return response.content, response.status_code
+
     for entry in config["paths"]:
         if ("/" + path) == entry["path"]:
             healthy_server = get_healthy_server(entry["path"], register)
@@ -34,4 +42,5 @@ def router(path="/"):
                 return "No backend servers available.", 503
             response = requests.get(f"http://{healthy_server.endpoint}")
             return response.content, response.status_code
+
     return "Not Found", 404

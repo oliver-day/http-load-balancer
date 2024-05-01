@@ -4,6 +4,7 @@ from models import Server
 from utils import (
     healthcheck,
     get_healthy_server,
+    process_rewrite_rules,
     process_rules,
     transform_backends_from_config,
 )
@@ -147,3 +148,34 @@ def test_process_param_rules():
     params = {"RemoveMe": "Remove"}
     results = process_rules(input, "www.mango.com", params, "param")
     assert results == {"MyCustomParam": "Test"}
+
+
+def test_process_rewrite_rules():
+    input = yaml.safe_load(
+        """
+        hosts:
+          - host: www.mango.com
+            rewrite_rules:
+              replace:
+                v1: v2
+            servers:
+              - localhost:8081
+              - localhost:8082
+          - host: www.apple.com
+            servers:
+              - localhost:9081
+              - localhost:9082
+        paths:
+          - path: /mango
+            servers:
+              - localhost:8081
+              - localhost:8082
+          - path: /apple
+            servers:
+              - localhost:9081
+              - localhost:9082
+    """
+    )
+    path = "localhost:8081/v1"
+    results = process_rewrite_rules(input, "www.mango.com", path)
+    assert results == "localhost:8081/v2"

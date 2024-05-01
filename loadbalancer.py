@@ -5,6 +5,7 @@ from utils import (
     get_healthy_server,
     healthcheck,
     load_configuration,
+    process_rewrite_rules,
     process_rules,
     transform_backends_from_config,
 )
@@ -36,10 +37,14 @@ def router(path="/"):
             params = process_rules(
                 config, host_header, {k: v for k, v in request.args.items()}, "param"
             )
+            rewrite_path = ""
+            if path == "v1":
+                rewrite_path = process_rewrite_rules(config, host_header, path)
             response = requests.get(
-                f"http://{healthy_server.endpoint}", headers=headers, params=params
+                f"http://{healthy_server.endpoint}/{rewrite_path}",
+                headers=headers,
+                params=params,
             )
-
             return response.content, response.status_code
 
     for entry in config["paths"]:

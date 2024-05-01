@@ -37,6 +37,14 @@ def healthcheck(register):
     return register
 
 
+def process_rewrite_rules(config, host, path):
+    for entry in config.get("hosts", []):
+        if host == entry["host"]:
+            rewrite_rules = entry.get("rewrite_rules", {})
+            for current_path, new_path in rewrite_rules["replace"].items():
+                return path.replace(current_path, new_path)
+
+
 def process_rules(config, host, rules, modify):
     modify_options = {"header": "header_rules", "param": "param_rules"}
     for entry in config.get("hosts", []):

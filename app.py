@@ -17,6 +17,16 @@ def sample():
     )
 
 
+@app.route("/v1")
+def v1():
+    return "This is V1"
+
+
+@app.route("/v2")
+def v2():
+    return "This is V2"
+
+
 @app.route("/healthcheck")
 def healthcheck():
     return "OK"

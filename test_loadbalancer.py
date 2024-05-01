@@ -44,6 +44,11 @@ def test_host_routing_notfound(client):
     assert 404 == result.status_code
 
 
+def test_rewrite_host_routing(client):
+    result = client.get("/v1", headers={"Host": "www.mango.com"})
+    assert b"This is V2" == result.data
+
+
 def test_path_routing_mango(client):
     result = client.get("/mango")
     data = json.loads(result.data.decode())

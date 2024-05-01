@@ -94,3 +94,13 @@ def test_firewall_ip_accept(client):
         headers={"Host": "www.mango.com"},
     )
     assert result.status_code == 200
+
+
+def test_firewall_path_reject(client):
+    result = client.get("/messages", headers={"Host": "www.apple.com"})
+    assert result.status_code == 403
+
+
+def test_firewall_path_accept(client):
+    result = client.get("/pictures", headers={"Host": "www.apple.com"})
+    assert result.status_code == 200

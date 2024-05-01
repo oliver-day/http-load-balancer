@@ -25,7 +25,7 @@ def router(path="/"):
     host_header = request.headers["Host"]
 
     if not process_firewall_rules_flag(
-        config, host_header, request.environ["REMOTE_ADDR"]
+        config, host_header, request.environ["REMOTE_ADDR"], f"/{path}"
     ):
         return "Forbidden", 403
 

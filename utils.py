@@ -23,9 +23,17 @@ def transform_backends_from_config(config):
     return register
 
 
+def least_connections(servers):
+    if not servers:
+        return None
+    return min(servers, key=lambda x: x.open_connections)
+
+
 def get_healthy_server(host, register):
     try:
-        return random.choice([server for server in register[host] if server.healthy])
+        return least_connections(
+            [server for server in register[host] if server.healthy]
+        )
     except IndexError:
         return None
 

@@ -4,7 +4,7 @@ from models import Server
 from utils import (
     healthcheck,
     get_healthy_server,
-    process_header_rules,
+    process_rules,
     transform_backends_from_config,
 )
 
@@ -112,5 +112,38 @@ def test_process_header_rules():
     """
     )
     headers = {"Host": "www.mango.com"}
-    results = process_header_rules(input, "www.mango.com", headers)
+    results = process_rules(input, "www.mango.com", headers, "header")
     assert results == {"MyCustomHeader": "Test"}
+
+
+def test_process_param_rules():
+    input = yaml.safe_load(
+        """
+        hosts:
+          - host: www.mango.com
+            param_rules:
+              add:
+                MyCustomParam: Test
+              remove:
+                RemoveMe: Remove
+            servers:
+              - localhost:8081
+              - localhost:8082
+          - host: www.apple.com
+            servers:
+              - localhost:9081
+              - localhost:9082
+        paths:
+          - path: /mango
+            servers:
+              - localhost:8081
+              - localhost:8082
+          - path: /apple
+            servers:
+              - localhost:9081
+              - localhost:9082
+    """
+    )
+    params = {"RemoveMe": "Remove"}
+    results = process_rules(input, "www.mango.com", params, "param")
+    assert results == {"MyCustomParam": "Test"}

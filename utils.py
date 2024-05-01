@@ -37,10 +37,11 @@ def healthcheck(register):
     return register
 
 
-def process_header_rules(config, host, rules):
+def process_rules(config, host, rules, modify):
+    modify_options = {"header": "header_rules", "param": "param_rules"}
     for entry in config.get("hosts", []):
         if host == entry["host"]:
-            header_rules = entry.get("header_rules", {})
+            header_rules = entry.get(modify_options[modify], {})
             for instruction, modify_headers in header_rules.items():
                 if instruction == "add":
                     rules.update(modify_headers)

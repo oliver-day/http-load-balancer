@@ -66,3 +66,12 @@ def process_rules(config, host, rules, modify):
                         if key in rules:
                             rules.pop(key)
     return rules
+
+
+def process_firewall_rules_flag(config, host, client_ip):
+    for entry in config.get("hosts", []):
+        if host == entry["host"]:
+            firewall_rules = entry.get("firewall_rules", {})
+            if client_ip in firewall_rules.get("ip_reject", []):
+                return False
+    return True

@@ -5,6 +5,7 @@ from utils import (
     get_healthy_server,
     healthcheck,
     load_configuration,
+    process_firewall_rules_flag,
     process_rewrite_rules,
     process_rules,
     transform_backends_from_config,
@@ -22,6 +23,11 @@ register = transform_backends_from_config(config)
 def router(path="/"):
     updated_register = healthcheck(register)
     host_header = request.headers["Host"]
+
+    if not process_firewall_rules_flag(
+        config, host_header, request.environ["REMOTE_ADDR"]
+    ):
+        return "Forbidden", 403
 
     for entry in config["hosts"]:
         if host_header == entry["host"]:
